@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azraq2 - News Feed</title>
+    <style>
+        body { background-color: #1a1a1a; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+        
+        /* تصميم شريط الأخبار الاحترافي */
+        .ticker-container {
+            background-color: #8B0000;
+            color: #ffffff;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            border-bottom: 3px solid #5f0000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .ticker-text {
+            white-space: nowrap;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* تذييل الصفحة */
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            width: 100%;
+            text-align: center;
+            color: #444;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ticker-container">
+        <marquee id="azraq-ticker" direction="right" scrollamount="7" loop="-1" onmouseover="this.stop();" onmouseout="this.start();">
+            جاري جلب الأخبار من المصادر المطلعة...
+        </marquee>
+    </div>
+
+    <div style="text-align: center; margin-top: 30vh;">
+        <h1 style="color: #8B0000; font-size: 4em; margin: 0; text-shadow: 3px 3px #000;">Azraq2</h1>
+        <p style="color: #666; font-size: 1.2em;">نظام جلب الأخبار الذكي</p>
+    </div>
+
+    <div class="footer">
+        Developed by TowMes©™ | ناصر الكود - ناصر 10
+    </div>
+
+    <script>
+        // المصدر الذي قدمته يا زورو 2
+        const rssSource = 'https://rss.app/feeds/1GBcT05q8x1bs7w5.xml';
+        // وسيط JSON لتحويل XML إلى بيانات مقروءة برمجياً
+        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssSource)}`;
+
+        async function updateNews() {
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.status === 'ok') {
+                    let tickerHTML = "";
+                    data.items.forEach(item => {
+                        // دمج هويتك في كل خبر
+                        tickerHTML += ` <span style="color: #FFD700;">★</span> من مصادر مطلعة: ${item.title} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `;
+                    });
+                    // مضاعفة النص لضمان استمرارية الحركة دون انقطاع
+                    document.getElementById('azraq-ticker').innerHTML = tickerHTML + tickerHTML;
+                }
+            } catch (error) {
+                document.getElementById('azraq-ticker').innerHTML = "🔴 ناصر الكود: فشل الاتصال بالمصدر، يرجى التحقق من الرابط.";
+            }
+        }
+
+        // تنفيذ الجلب عند التحميل
+        updateNews();
+        // تحديث الأخبار تلقائياً كل 10 دقائق دون الحاجة لإعادة تحميل الصفحة
+        setInterval(updateNews, 600000);
+    </script>
+
+</body>
+</html>
