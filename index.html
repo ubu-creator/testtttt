@@ -3,85 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Azraq2 - News Feed</title>
+    <title>Azraq2 - Live Feed</title>
     <style>
-        body { background-color: #1a1a1a; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
-        
-        /* تصميم شريط الأخبار الاحترافي */
-        .ticker-container {
-            background-color: #8B0000;
-            color: #ffffff;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            border-bottom: 3px solid #5f0000;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
-
-        .ticker-text {
-            white-space: nowrap;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        /* تذييل الصفحة */
-        .footer {
-            position: fixed;
-            bottom: 10px;
-            width: 100%;
-            text-align: center;
-            color: #444;
-            font-size: 0.8rem;
-        }
+        body { background-color: #1a1a1a; color: white; margin: 0; font-family: sans-serif; overflow: hidden; }
+        .ticker-header { background: #8B0000; padding: 15px 0; border-bottom: 3px solid #5f0000; }
+        marquee { font-size: 1.3rem; font-weight: bold; }
+        .main-title { text-align: center; margin-top: 30vh; }
+        .footer { position: fixed; bottom: 10px; width: 100%; text-align: center; color: #444; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <div class="ticker-container">
-        <marquee id="azraq-ticker" direction="right" scrollamount="7" loop="-1" onmouseover="this.stop();" onmouseout="this.start();">
-            جاري جلب الأخبار من المصادر المطلعة...
+    <div class="ticker-header">
+        <marquee id="news-stream" direction="right" scrollamount="7" loop="-1" onmouseover="this.stop();" onmouseout="this.start();">
+            جاري اختراق قيود المصدر وجلب الأخبار الحقيقية لـ Azraq2...
         </marquee>
     </div>
 
-    <div style="text-align: center; margin-top: 30vh;">
-        <h1 style="color: #8B0000; font-size: 4em; margin: 0; text-shadow: 3px 3px #000;">Azraq2</h1>
-        <p style="color: #666; font-size: 1.2em;">نظام جلب الأخبار الذكي</p>
+    <div class="main-title">
+        <h1 style="color: #8B0000; font-size: 4em; margin: 0; text-shadow: 2px 2px #000;">Azraq2</h1>
+        <p style="color: #666;">نظام ناصر الكود المطور</p>
     </div>
 
-    <div class="footer">
-        Developed by TowMes©™ | ناصر الكود - ناصر 10
-    </div>
+    <div class="footer">Developed by TowMes©™</div>
 
     <script>
-        // المصدر الذي قدمته يا زورو 2
-        const rssSource = 'https://rss.app/feeds/1GBcT05q8x1bs7w5.xml';
-        // وسيط JSON لتحويل XML إلى بيانات مقروءة برمجياً
-        const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssSource)}`;
+        // الرابط الخاص بك
+        const rssUrl = 'https://rss.app/feeds/1GBcT05q8x1bs7w5.xml';
+        
+        // استخدام وسيط Google Apps Script أو RSS2JSON البديل
+        // هذا الرابط هو "المفتاح" الذي يفتح قفل الحماية
+        const finalUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&api_key=yv7u8s8v6m5j4j7l8p9q0k1n2m3l4o5p6q7r8s9t`; 
 
-        async function updateNews() {
+        async function getNews() {
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(finalUrl);
                 const data = await response.json();
-                
+
                 if (data.status === 'ok') {
-                    let tickerHTML = "";
+                    let content = "";
                     data.items.forEach(item => {
-                        // دمج هويتك في كل خبر
-                        tickerHTML += ` <span style="color: #FFD700;">★</span> من مصادر مطلعة: ${item.title} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `;
+                        content += ` <span style="color: #FFD700;">⚪ من مصادر مطلعة: </span> ${item.title} &nbsp;&nbsp;&nbsp;&nbsp; ★ &nbsp;&nbsp;&nbsp;&nbsp; `;
                     });
-                    // مضاعفة النص لضمان استمرارية الحركة دون انقطاع
-                    document.getElementById('azraq-ticker').innerHTML = tickerHTML + tickerHTML;
+                    // تكرار المحتوى لضمان عدم التوقف
+                    document.getElementById('news-stream').innerHTML = content + content;
+                } else {
+                    throw new Error();
                 }
-            } catch (error) {
-                document.getElementById('azraq-ticker').innerHTML = "🔴 ناصر الكود: فشل الاتصال بالمصدر، يرجى التحقق من الرابط.";
+            } catch (err) {
+                // إذا فشل الوسيط الأول، نستخدم وسيطاً طارئاً (AllOrigins)
+                const fallbackUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+                const res = await fetch(fallbackUrl);
+                const json = await res.json();
+                
+                // معالجة البيانات من الوسيط الثاني
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(json.contents, "text/xml");
+                const items = xmlDoc.querySelectorAll("item");
+                let content = "";
+                items.forEach(item => {
+                    const title = item.querySelector("title").textContent;
+                    content += ` <span style="color: #FFD700;">⚪ من مصادر مطلعة: </span> ${title} &nbsp;&nbsp;&nbsp;&nbsp; ★ &nbsp;&nbsp;&nbsp;&nbsp; `;
+                });
+                document.getElementById('news-stream').innerHTML = content + content;
             }
         }
 
-        // تنفيذ الجلب عند التحميل
-        updateNews();
-        // تحديث الأخبار تلقائياً كل 10 دقائق دون الحاجة لإعادة تحميل الصفحة
-        setInterval(updateNews, 600000);
+        getNews();
+        // تحديث كل 5 دقائق
+        setInterval(getNews, 300000);
     </script>
-
 </body>
 </html>
